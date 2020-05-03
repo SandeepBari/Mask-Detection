@@ -9,13 +9,17 @@ ds_factor = 0.5
 
 def detection(grayscale, frame):
     face = face_cascade.detectMultiScale(grayscale, 1.3, 5)
+    org = (170 , 30)
+    flag= 0
 
     for (x_face, y_face, w_face, h_face) in face:
 
         faceDetect= cv2.rectangle(frame, (0, 0), (0, 0), (255, 130, 0), 0)
+        org = (x_face - 40, y_face - 80)
 
         frameGrayscale = grayscale[y_face:y_face+h_face, x_face:x_face+w_face]
         frameUse = frame[y_face:y_face+h_face, x_face:x_face+w_face] 
+        flag= 1
         
         #frame = cv2.resize(frame, None, fx=ds_factor, fy=ds_factor, interpolation=cv2.INTER_AREA)
         gray = cv2.cvtColor(frameUse, cv2.COLOR_BGR2GRAY)
@@ -23,25 +27,23 @@ def detection(grayscale, frame):
         noseExpose = nose_cascade.detectMultiScale(gray, 1.3, 5)
         for (x_nose,y_nose,w_nose,h_nose) in noseExpose:
            noseDetect= cv2.rectangle(frameUse, (0,0), (0+0,0+0), (255,0,130), 0)
-           #break
                 	
         mouthOpen = mouthOpen_cascade.detectMultiScale(frameGrayscale, 1.7, 20)
         for (x_mouth, y_mouth, w_mouth, h_mouth) in mouthOpen: 
            mouthDetect= cv2.rectangle(frameUse,(0,0), (0+0,0+0), (255, 0, 130), 0)
-           #break
    
     if 'noseDetect' in locals() or 'mouthDetect' in locals():
-        #print('No Mask Detected')
         maskStr= 'No Mask Detected '
         color = (255, 255, 255)
-        org = (150, 50)
 
-    else:
-        #print('Mask is propery Worn')
+    elif flag == 1:
         maskStr= 'Mask is propery Worn'
         color = (0, 255, 0)
-        org = (150, 50)
 
+    else:
+        maskStr= 'No Face Detected'
+        color = (0, 255, 0)
+       
 
     return frame, maskStr, color, org;
 
@@ -59,7 +61,7 @@ while True:
     cv2.imshow('Mask Detector', finalFrame)
 
 
-    # Stop if escape key is pressed
+    # Stop if enter key is pressed
     pressedKey = cv2.waitKey(10) & 0xff
     if pressedKey==13: 
         break  
